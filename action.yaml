@@ -56,7 +56,7 @@ runs:
     - name: Validate dockerfile
       shell: bash
       run: |
-        $GITHUB_ACTION_PATH/scripts/check.sh ${{ inputs.dockerfile }}
+        $GITHUB_ACTION_PATH/scripts/check.sh "${{ inputs.dockerfile }}" "${{ inputs.packages }}"
 
     - name: Invoke Docker build
       id: build-image
