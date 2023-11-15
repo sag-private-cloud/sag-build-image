@@ -35,13 +35,10 @@ inputs:
     description: "Packages to install seperated by space (E.g. 'WmPackage1:QA WmPackage2:QA')"      
   
 outputs:
-  helm-chart-values-file-name:
-    description: "The helm chart values file name for builded image"
-    value: ${{ steps.setenv.outputs.helm-chart-values-file-name }}
-  helm-chart-values-artifact-name:
-    description: "The artifact name where helm chart values for builded image are stored"
-    value: ${{ steps.setenv.outputs.helm-chart-values-artifact-name }}
-   
+  image-name:
+    description: "The name of the builded image"
+    value: ${{ inputs.image-name }}
+
 runs:
   using: "composite"
   steps:
@@ -49,9 +46,6 @@ runs:
       id: setenv
       shell: bash
       run: |
-        echo "helm-chart-values-file-name=helm-chart-output-values.yml" >> $GITHUB_OUTPUT
-        echo "helm-chart-values-artifact-name=helm-chart-values" >> $GITHUB_OUTPUT
-        
         echo "base-runtime-arg=$(baseRuntime='${{ inputs.base-runtime }}' && [ -z $baseRuntime ] && echo '' || echo "--build-arg baseruntime=$baseRuntime") >> $GITHUB_OUTPUT
         echo "builder-number-arg=$(builderNumber='${{ inputs.builder-number }}' && [ -z $builderNumber ] && echo '' || echo "--build-arg buildnumber=$builderNumber") >> $GITHUB_OUTPUT
         echo "wpm-registry-server-arg=$(wpmRegistryServer='${{ inputs.wpm-registry-server }}' && [ -z $wpmRegistryServer ] && echo '' || echo "--build-arg wpmregistryserver=$wpmRegistryServer") >> $GITHUB_OUTPUT
@@ -85,12 +79,6 @@ runs:
         echo "build-duration-seconds=$((buildEnd - buildStarted))" >> $GITHUB_OUTPUT
         echo "promotion-image-size=$(docker images ${{ inputs.image-name }} --format "{{.Size}}")" >> $GITHUB_OUTPUT
 
-    - name: Store Helm Chart values file artifact
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # Version v3.1.2
-      with:
-        name: ${{ steps.setenv.outputs.helm-chart-values-artifact-name }}
-        path: ${{ steps.setenv.outputs.helm-chart-values-file-name }}
-        
     - name: Include summary
       shell: bash
       run: |
