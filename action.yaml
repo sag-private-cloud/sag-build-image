@@ -46,12 +46,12 @@ runs:
       id: setenv
       shell: bash
       run: |
-        echo "base-runtime-arg=$(baseRuntime='${{ inputs.base-runtime }}' && [ -z $baseRuntime ] && echo '' || echo "--build-arg baseruntime=$baseRuntime") >> $GITHUB_OUTPUT
-        echo "builder-number-arg=$(builderNumber='${{ inputs.builder-number }}' && [ -z $builderNumber ] && echo '' || echo "--build-arg buildnumber=$builderNumber") >> $GITHUB_OUTPUT
-        echo "wpm-registry-server-arg=$(wpmRegistryServer='${{ inputs.wpm-registry-server }}' && [ -z $wpmRegistryServer ] && echo '' || echo "--build-arg wpmregistryserver=$wpmRegistryServer") >> $GITHUB_OUTPUT
-        echo "wpm-registry-arg=$(wpmRegistry='${{ inputs.wpm-registry }}' && [ -z $wpmRegistry ] && echo '' || echo "--build-arg wpmregistry=$wpmRegistry") >> $GITHUB_OUTPUT
-        echo "wpm-registry-token-arg=$(wpmRegistryToken='${{ inputs.wpm-registry-token }}' && [ -z $wpmRegistryToken ] && echo '' || echo "--build-arg wpmregistrytoken=$wpmRegistryToken") >> $GITHUB_OUTPUT
-        echo "packages-arg=$(packages='${{ inputs.packages }}' && [ -z $packages ] && echo '' || echo "--build-arg packages=\"$packages\"") >> $GITHUB_OUTPUT
+        echo "base-runtime-arg=$(baseRuntime='${{ inputs.base-runtime }}' && [ -z $baseRuntime ] && echo '' || echo "--build-arg baseruntime=$baseRuntime")" >> $GITHUB_OUTPUT
+        echo "builder-number-arg=$(builderNumber='${{ inputs.builder-number }}' && [ -z $builderNumber ] && echo '' || echo "--build-arg buildnumber=$builderNumber")" >> $GITHUB_OUTPUT
+        echo "wpm-registry-server-arg=$(wpmRegistryServer='${{ inputs.wpm-registry-server }}' && [ -z $wpmRegistryServer ] && echo '' || echo "--build-arg wpmregistryserver=$wpmRegistryServer")" >> $GITHUB_OUTPUT
+        echo "wpm-registry-arg=$(wpmRegistry='${{ inputs.wpm-registry }}' && [ -z $wpmRegistry ] && echo '' || echo "--build-arg wpmregistry=$wpmRegistry")" >> $GITHUB_OUTPUT
+        echo "wpm-registry-token-arg=$(wpmRegistryToken='${{ inputs.wpm-registry-token }}' && [ -z $wpmRegistryToken ] && echo '' || echo "--build-arg wpmregistrytoken=$wpmRegistryToken")" >> $GITHUB_OUTPUT
+        echo "packages-arg=$(packages='${{ inputs.packages }}' && [ -z $packages ] && echo '' || echo "--build-arg packages=\"$packages\"")" >> $GITHUB_OUTPUT
     
     - name: Validate dockerfile
       shell: bash
@@ -66,9 +66,6 @@ runs:
         # in case build failed we need this variable to exist
         echo "build-duration-seconds=''" >> $GITHUB_OUTPUT
 
-        echo "Packages"
-        echo "${{ steps.setenv.outputs.packages-arg }}"
-        
         docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} \
           ${{ steps.setenv.outputs.base-runtime-arg }} \
           ${{ steps.setenv.outputs.builder-number-arg }} \
