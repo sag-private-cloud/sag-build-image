@@ -25,8 +25,8 @@ inputs:
     default: packages.softwareag.com
     description: ""
   wpm-registry:
-    required: true
-    description: ""
+    required: false
+    description: softwareag
   wpm-registry-token:
     required: true
     description: ""
@@ -65,6 +65,9 @@ runs:
         buildStarted=$SECONDS
         # in case build failed we need this variable to exist
         echo "build-duration-seconds=''" >> $GITHUB_OUTPUT
+
+        echo "Packages"
+        echo "${{ steps.setenv.outputs.packages-arg }}"
         
         docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} \
           ${{ steps.setenv.outputs.base-runtime-arg }} \
