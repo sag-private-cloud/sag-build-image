@@ -1,0 +1,108 @@
+name: "Execute Docker image build"
+description: ""
+
+inputs:
+  context:
+    required: true
+    description: ""
+  dockerfile:
+    required: true
+    description: ""
+  image-name:
+    required: true
+    description: ""
+  base-runtime: 
+    required: false
+    description: "The base runtime image to use"
+  builder-number:
+    required: false
+    description: ""
+  extra-args:
+    required: false
+    description: ""
+  wpm-registry-server:
+    required: false
+    default: packages.softwareag.com
+    description: ""
+  wpm-registry:
+    required: true
+    description: ""
+  wpm-registry-token:
+    required: true
+    description: ""
+  packages:
+    required: false
+    description: "Packages to install seperated by space (E.g. 'WmPackage1:QA WmPackage2:QA')"      
+  
+outputs:
+  helm-chart-values-file-name:
+    description: "The helm chart values file name for builded image"
+    value: ${{ steps.setenv.outputs.helm-chart-values-file-name }}
+  helm-chart-values-artifact-name:
+    description: "The artifact name where helm chart values for builded image are stored"
+    value: ${{ steps.setenv.outputs.helm-chart-values-artifact-name }}
+   
+runs:
+  using: "composite"
+  steps:
+    - name: Set env
+      id: setenv
+      shell: bash
+      run: |
+        echo "helm-chart-values-file-name=helm-chart-output-values.yml" >> $GITHUB_OUTPUT
+        echo "helm-chart-values-artifact-name=helm-chart-values" >> $GITHUB_OUTPUT
+        
+        echo "base-runtime-arg=$(baseRuntime='${{ inputs.base-runtime }}' && [ -z $baseRuntime ] && echo '' || echo "--build-arg baseruntime=$baseRuntime") >> $GITHUB_OUTPUT
+        echo "builder-number-arg=$(builderNumber='${{ inputs.builder-number }}' && [ -z $builderNumber ] && echo '' || echo "--build-arg buildnumber=$builderNumber") >> $GITHUB_OUTPUT
+        echo "wpm-registry-server-arg=$(wpmRegistryServer='${{ inputs.wpm-registry-server }}' && [ -z $wpmRegistryServer ] && echo '' || echo "--build-arg wpmregistryserver=$wpmRegistryServer") >> $GITHUB_OUTPUT
+        echo "wpm-registry-arg=$(wpmRegistry='${{ inputs.wpm-registry }}' && [ -z $wpmRegistry ] && echo '' || echo "--build-arg wpmregistry=$wpmRegistry") >> $GITHUB_OUTPUT
+        echo "wpm-registry-token-arg=$(wpmRegistryToken='${{ inputs.wpm-registry-token }}' && [ -z $wpmRegistryToken ] && echo '' || echo "--build-arg wpmregistrytoken=$wpmRegistryToken") >> $GITHUB_OUTPUT
+        echo "packages-arg=$(packages='${{ inputs.packages }}' && [ -z $packages ] && echo '' || echo "--build-arg packages=\"$packages\"") >> $GITHUB_OUTPUT
+    
+    - name: Validate dockerfile
+      shell: bash
+      run: |
+        $GITHUB_ACTION_PATH/scripts/check.sh ${{ inputs.dockerfile }}
+
+    - name: Invoke Docker build
+      id: build-image
+      shell: bash
+      run: |
+        buildStarted=$SECONDS
+        # in case build failed we need this variable to exist
+        echo "build-duration-seconds=''" >> $GITHUB_OUTPUT
+        
+        docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} \
+          ${{ steps.setenv.outputs.base-runtime-arg }} \
+          ${{ steps.setenv.outputs.builder-number-arg }} \
+          ${{ steps.setenv.outputs.wpm-registry-server-arg }} \
+          ${{ steps.setenv.outputs.wpm-registry-arg }} \
+          ${{ steps.setenv.outputs.wpm-registry-token-arg }} \
+          ${{ steps.setenv.outputs.packages-arg }} \
+          ${{ inputs.extra-args }}
+
+        buildEnd=$SECONDS
+        echo "build-duration-seconds=$((buildEnd - buildStarted))" >> $GITHUB_OUTPUT
+        echo "promotion-image-size=$(docker images ${{ steps.setenv.outputs.image-full-name }} --format "{{.Size}}")" >> $GITHUB_OUTPUT
+
+    - name: Store Helm Chart values file artifact
+      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # Version v3.1.2
+      with:
+        name: ${{ steps.setenv.outputs.helm-chart-values-artifact-name }}
+        path: ${{ steps.setenv.outputs.helm-chart-values-file-name }}
+        
+    - name: Include summary
+      shell: bash
+      run: |
+        echo "Including step summary..."
+        echo "|Name|Value|" >> $GITHUB_STEP_SUMMARY
+        echo "|:-:|:-:|" >> $GITHUB_STEP_SUMMARY
+        echo "|Image full name|${{ inputs.image-name }}|" >> $GITHUB_STEP_SUMMARY
+        echo "|Image size|${{ steps.build-image.outputs.promotion-image-size }}|" >> $GITHUB_STEP_SUMMARY
+        echo "|Build duration| ${{ steps.build-image.outputs.build-duration-seconds }} seconds |" >> $GITHUB_STEP_SUMMARY
+        echo "|Base image| ${{ inputs.base-runtime }} |" >> $GITHUB_STEP_SUMMARY
+
+        extraArgs=$(echo ${{ inputs.extra-args }})
+        if [ ! -z "$extraArgs" ]; then
+          echo "|Extra args|${extraArgs}|" >> $GITHUB_STEP_SUMMARY
+        fi
