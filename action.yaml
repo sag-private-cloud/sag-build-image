@@ -22,7 +22,7 @@ inputs:
     description: ""
   wpm-registry-server:
     required: false
-    default: packages.softwareag.com
+    default: https://packages.softwareag.com
     description: ""
   wpm-registry:
     required: false
@@ -66,14 +66,7 @@ runs:
         # in case build failed we need this variable to exist
         echo "build-duration-seconds=''" >> $GITHUB_OUTPUT
 
-        docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} \
-          ${{ steps.setenv.outputs.base-runtime-arg }} \
-          ${{ steps.setenv.outputs.builder-number-arg }} \
-          ${{ steps.setenv.outputs.wpm-registry-server-arg }} \
-          ${{ steps.setenv.outputs.wpm-registry-arg }} \
-          ${{ steps.setenv.outputs.wpm-registry-token-arg }} \
-          ${{ steps.setenv.outputs.packages-arg }} \
-          ${{ inputs.extra-args }}
+        docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} ${{ steps.setenv.outputs.base-runtime-arg }} ${{ steps.setenv.outputs.builder-number-arg }} ${{ steps.setenv.outputs.wpm-registry-server-arg }} ${{ steps.setenv.outputs.wpm-registry-arg }} ${{ steps.setenv.outputs.wpm-registry-token-arg }} ${{ steps.setenv.outputs.packages-arg }} ${{ inputs.extra-args }}
 
         buildEnd=$SECONDS
         echo "build-duration-seconds=$((buildEnd - buildStarted))" >> $GITHUB_OUTPUT
