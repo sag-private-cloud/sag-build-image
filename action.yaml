@@ -81,9 +81,21 @@ runs:
         echo "|Image full name|${{ inputs.image-name }}|" >> $GITHUB_STEP_SUMMARY
         echo "|Image size|${{ steps.build-image.outputs.promotion-image-size }}|" >> $GITHUB_STEP_SUMMARY
         echo "|Build duration| ${{ steps.build-image.outputs.build-duration-seconds }} seconds |" >> $GITHUB_STEP_SUMMARY
-        echo "|Base image| ${{ inputs.base-runtime }} |" >> $GITHUB_STEP_SUMMARY
+        
+        if [ ! -z "${{ inputs.base-runtime }}" ]; then
+          echo "|Base image| ${{ inputs.base-runtime }} |" >> $GITHUB_STEP_SUMMARY
+        fi
 
         extraArgs=$(echo ${{ inputs.extra-args }})
         if [ ! -z "$extraArgs" ]; then
           echo "|Extra args|${extraArgs}|" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ ! -z "${{ inputs.packages }}" ]; then
+          echo "|WPM registry server| ${{ inputs.wpm-registry-server }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|WPM registry| ${{ inputs.wpm-registry }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|Installed WPM packages| |" >> $GITHUB_STEP_SUMMARY
+          for package in ${{ inputs.packages }}; done
+            echo "||`$package`|" >> $GITHUB_STEP_SUMMARY
+          done
         fi
