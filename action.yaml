@@ -96,6 +96,6 @@ runs:
           echo "|WPM registry| ${{ inputs.wpm-registry }}|" >> $GITHUB_STEP_SUMMARY
           echo "|Installed WPM packages| |" >> $GITHUB_STEP_SUMMARY
           for package in ${{ inputs.packages }}; do
-            echo "||`$package`|" >> $GITHUB_STEP_SUMMARY
+            echo "||\`$package\`|" >> $GITHUB_STEP_SUMMARY
           done
         fi
