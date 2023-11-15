@@ -83,7 +83,7 @@ runs:
 
         buildEnd=$SECONDS
         echo "build-duration-seconds=$((buildEnd - buildStarted))" >> $GITHUB_OUTPUT
-        echo "promotion-image-size=$(docker images ${{ steps.setenv.outputs.image-full-name }} --format "{{.Size}}")" >> $GITHUB_OUTPUT
+        echo "promotion-image-size=$(docker images ${{ inputs.image-name }} --format "{{.Size}}")" >> $GITHUB_OUTPUT
 
     - name: Store Helm Chart values file artifact
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # Version v3.1.2
