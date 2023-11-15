@@ -4,6 +4,7 @@ set -e
 
 _check_dockerfile() {
   dockerfileLocation=$1
+  packages=$2
 
   # ERRORS
   baseRuntimeArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "baseruntime")
@@ -12,18 +13,20 @@ _check_dockerfile() {
   baseRuntimeArgLineUsageLine=$(_get_dockerfile_from_line $dockerfileLocation '${baseruntime}')
   _fail_on_empty "$baseRuntimeArgLineUsageLine" "Dockerfile check FAILED. The dockerfile does not use the \"baseruntime\" argument in a FROM instructuon. "
 
-  # WARNINGS
-  # TODO consider checking if packages arg is provided and if so fail instead of warn
-  wmpRegistryServerArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistryserver")
-  _warn_on_empty "$wmpRegistryServerArgLine" "Dockerfile check WARNING. The dockerfile does not declare \"wpmregistryserver\" argument (Example: ARG wpmregistryserver=...)."
-  
-  wmpRegistryArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistry")
-  _warn_on_empty "$wmpRegistryArgLine" "Dockerfile check WARNING. The dockerfile does not declare \"wpmregistry\" argument (Example: ARG wpmregistry=...)."
-  
-  wmpRegistryTokenArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistrytoken")
-  _warn_on_empty "$wmpRegistryTokenArgLine" "Dockerfile check WARNING. The dockerfile does not declare \"wpmregistrytoken\" argument (Example: ARG wpmregistrytoken=...)."
-  packagesArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "packages")
-  _warn_on_empty "$packagesArgLine" "Dockerfile check WARNING. The dockerfile does not declare \"packages\" argument (Example: ARG packages=...)."
+  if [ -n "$packages" ]
+  then
+    wmpRegistryServerArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistryserver")
+    _fail_on_empty "$wmpRegistryServerArgLine" "Dockerfile check ERROR. The dockerfile does not declare \"wpmregistryserver\" argument (Example: ARG wpmregistryserver=...)."
+    
+    wmpRegistryArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistry")
+    _fail_on_empty "$wmpRegistryArgLine" "Dockerfile check ERROR. The dockerfile does not declare \"wpmregistry\" argument (Example: ARG wpmregistry=...)."
+    
+    wmpRegistryTokenArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "wpmregistrytoken")
+    _fail_on_empty "$wmpRegistryTokenArgLine" "Dockerfile check ERROR. The dockerfile does not declare \"wpmregistrytoken\" argument (Example: ARG wpmregistrytoken=...)."
+    
+    packagesArgLine=$(_get_dockerfile_arg_line $dockerfileLocation "packages")
+    _fail_on_empty "$packagesArgLine" "Dockerfile check ERROR. The dockerfile does not declare \"packages\" argument (Example: ARG packages=...)."
+  fi
 }
 
 
@@ -76,15 +79,6 @@ _fail_on_empty() {
   fi
 }
 
-_warn_on_empty() {
-  value=$1
-  warnMsg=$2
-  if [ -z "$value" ]
-  then
-     echo "WARNING: $warnMsg"
-  fi
-}
-
 _fail_with_msg() {
   failMsg=$1
   echo "ERROR: $failMsg"
@@ -93,7 +87,9 @@ _fail_with_msg() {
 
 main()
 {
-  _check_dockerfile $1
+  dockerfileLocation=$1
+  packages=$2
+  _check_dockerfile "$1" "$2"
 }
 
 main "$@"
