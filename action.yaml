@@ -88,7 +88,7 @@ runs:
         echo "|:-:|:-:|" >> $GITHUB_STEP_SUMMARY
         echo "|Image full name|${{ inputs.image-name }}|" >> $GITHUB_STEP_SUMMARY
         echo "|Image size|${{ steps.build-image.outputs.promotion-image-size }}|" >> $GITHUB_STEP_SUMMARY
-        echo "|Build duration| ${{ steps.build-image.outputs.build-duration-seconds }} seconds |" >> $GITHUB_STEP_SUMMARY
+        echo "|🕒 Build duration| ${{ steps.build-image.outputs.build-duration-seconds }} seconds |" >> $GITHUB_STEP_SUMMARY
         
         if [ ! -z "${{ inputs.base-runtime }}" ]; then
           echo "|Base image| ${{ inputs.base-runtime }} |" >> $GITHUB_STEP_SUMMARY
@@ -100,12 +100,12 @@ runs:
         fi
 
         if [ ! -z "${{ inputs.packages }}" ]; then
-          echo "|WPM Registry Server| ${{ inputs.wpm-registry-server }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|🌎 WPM Registry Server| ${{ inputs.wpm-registry-server }}|" >> $GITHUB_STEP_SUMMARY
           echo "|WPM Registry| ${{ inputs.wpm-registry }}|" >> $GITHUB_STEP_SUMMARY
-          echo "|Installed WPM Packages|${{ inputs.packages }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|📦 Installed WPM Packages|${{ inputs.packages }}|" >> $GITHUB_STEP_SUMMARY
         fi
 
         if [ ! -z "${{ inputs.custom-packages }}" ]; then
           echo "|Custom Packages Org URL| ${{ inputs.custom-packages-org-url }}|" >> $GITHUB_STEP_SUMMARY
-          echo "|Installed Custom Packages|${{ inputs.custom-packages }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|📦 Installed Custom Packages|${{ inputs.custom-packages }}|" >> $GITHUB_STEP_SUMMARY
         fi
