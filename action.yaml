@@ -24,6 +24,9 @@ inputs:
     required: false
     default: https://packages.softwareag.com
     description: ""
+  custom-packages-org-url:
+    required: false
+    description: ""
   wpm-registry:
     required: false
     description: softwareag
@@ -32,7 +35,10 @@ inputs:
     description: ""
   packages:
     required: false
-    description: "Packages to install seperated by space (E.g. 'WmPackage1:QA WmPackage2:QA')"      
+    description: "Packages to install seperated by space (E.g. 'WmPackage1:QA WmPackage2:QA')"
+  custom-packages:
+    required: false
+    description: "Custom Packages to install seperated by space (E.g. 'WmCustomPackage1:QA WmCustomPackage2:QA')"
   
 outputs:
   image-name:
@@ -52,6 +58,8 @@ runs:
         echo "wpm-registry-arg=$(wpmRegistry='${{ inputs.wpm-registry }}' && [ -z $wpmRegistry ] && echo '' || echo "--build-arg wpmregistry=$wpmRegistry")" >> $GITHUB_OUTPUT
         echo "wpm-registry-token-arg=$(wpmRegistryToken='${{ inputs.wpm-registry-token }}' && [ -z $wpmRegistryToken ] && echo '' || echo "--build-arg wpmregistrytoken=$wpmRegistryToken")" >> $GITHUB_OUTPUT
         echo "packages-arg=$(packages='${{ inputs.packages }}' && [ -z $packages ] && echo '' || echo "--build-arg packages=\"$packages\"")" >> $GITHUB_OUTPUT
+        echo "custom-packages-arg=$(customPackages='${{ inputs.custom-packages }}' && [ -z $customPackages ] && echo '' || echo "--build-arg custompackages=\"$customPackages\"")" >> $GITHUB_OUTPUT
+        echo "custom-packages-org-url-arg=$(customPackagesOrgUrl='${{ inputs.custom-packages-org-url }}' && [ -z $customPackagesOrgUrl ] && echo '' || echo "--build-arg custompackagesorgurl=\"$customPackagesOrgUrl\"")" >> $GITHUB_OUTPUT
     
     - name: Validate dockerfile
       shell: bash
@@ -66,7 +74,7 @@ runs:
         # in case build failed we need this variable to exist
         echo "build-duration-seconds=''" >> $GITHUB_OUTPUT
 
-        docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} ${{ steps.setenv.outputs.base-runtime-arg }} ${{ steps.setenv.outputs.builder-number-arg }} ${{ steps.setenv.outputs.wpm-registry-server-arg }} ${{ steps.setenv.outputs.wpm-registry-arg }} ${{ steps.setenv.outputs.wpm-registry-token-arg }} ${{ steps.setenv.outputs.packages-arg }} ${{ inputs.extra-args }}
+        docker build -t ${{ inputs.image-name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }} ${{ steps.setenv.outputs.base-runtime-arg }} ${{ steps.setenv.outputs.builder-number-arg }} ${{ steps.setenv.outputs.wpm-registry-server-arg }} ${{ steps.setenv.outputs.wpm-registry-arg }} ${{ steps.setenv.outputs.wpm-registry-token-arg }} ${{ steps.setenv.outputs.packages-arg }} ${{ steps.setenv.outputs.custom-packages-arg-arg }}  ${{ steps.setenv.outputs.custom-packages-org-url-arg }} ${{ inputs.extra-args }}
 
         buildEnd=$SECONDS
         echo "build-duration-seconds=$((buildEnd - buildStarted))" >> $GITHUB_OUTPUT
@@ -92,7 +100,12 @@ runs:
         fi
 
         if [ ! -z "${{ inputs.packages }}" ]; then
-          echo "|WPM registry server| ${{ inputs.wpm-registry-server }}|" >> $GITHUB_STEP_SUMMARY
-          echo "|WPM registry| ${{ inputs.wpm-registry }}|" >> $GITHUB_STEP_SUMMARY
-          echo "|Installed WPM packages|${{ inputs.packages }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|WPM Registry Server| ${{ inputs.wpm-registry-server }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|WPM Registry| ${{ inputs.wpm-registry }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|Installed WPM Packages|${{ inputs.packages }}|" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ ! -z "${{ inputs.custom-packages }}" ]; then
+          echo "|Custom Packages Org URL| ${{ inputs.custom-packages-org-url }}|" >> $GITHUB_STEP_SUMMARY
+          echo "|Installed Custom Packages|${{ inputs.custom-packages }}|" >> $GITHUB_STEP_SUMMARY
         fi
