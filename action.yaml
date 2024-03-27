@@ -1,49 +1,56 @@
-name: "Execute Docker image build"
-description: ""
+name: "Perform docker image build for webMethods based images"
+description: "Perform docker image build for webMethods based images, including packages installation"
 
 inputs:
   context:
     required: true
-    description: ""
+    description: "The docker build context"
   dockerfile:
     required: true
-    description: ""
+    description: "The dockerfile to use for the build"
   image-name:
     required: true
-    description: ""
+    description: "The full name of the image to build"
   base-runtime: 
     required: false
     description: "The base runtime image to use"
   builder-number:
     required: false
-    description: ""
+    description: "The build number to pass as buildnumber build-arg to the docker build process"
   extra-args:
     required: false
-    description: ""
+    description: "The extra arguments (build-args) to pass to the docker build process"
   wpm-registry-server:
     required: false
     default: https://packages.softwareag.com
-    description: ""
+    description: "The webMethods packages registry server to use for pulling packages"
   custom-packages-org-url:
     required: false
-    description: ""
+    description: "The GitHub organization URL for pulling custom packages located in GitHub"
   wpm-registry:
     required: false
-    description: softwareag
+    default: softwareag
+    description: "The webMethods packages registry to use from the webMethods packages registry server"
   wpm-registry-token:
     required: true
-    description: ""
+    description: "The webMethods packages registry authentication token"
   packages:
     required: false
-    description: "Packages to install seperated by space (E.g. 'WmPackage1:QA WmPackage2:QA')"
+    description: "Packages to install, registered in the webMethods packages registry, seperated by space (e.g. 'WmPackage1 WmPackage2')"
   custom-packages:
     required: false
-    description: "Custom Packages to install seperated by space (E.g. 'WmCustomPackage1:QA WmCustomPackage2:QA')"
+    description: "Custom Packages to install, located in the specified GitHub organization, seperated by space (e.g. 'CustomPackage1:main CustomPackage2:v1')"
   
 outputs:
   image-name:
-    description: "The name of the builded image"
+    description: "The full name of the built image"
     value: ${{ inputs.image-name }}
+  image-repository:
+    description: "The repository part of the built image"
+    value: ${{ steps.setenv.outputs.image-repository }}
+  image-tag:
+    description: "The tag part of the built image"
+    value: ${{ steps.setenv.outputs.image-tag }}
 
 runs:
   using: "composite"
@@ -60,6 +67,13 @@ runs:
         echo "packages-arg=$(packages='${{ inputs.packages }}' && [ -z $packages ] && echo '' || echo "--build-arg packages=\"$packages\"")" >> $GITHUB_OUTPUT
         echo "custom-packages-arg=$(customPackages='${{ inputs.custom-packages }}' && [ -z $customPackages ] && echo '' || echo "--build-arg custompackages=\"$customPackages\"")" >> $GITHUB_OUTPUT
         echo "custom-packages-org-url-arg=$(customPackagesOrgUrl='${{ inputs.custom-packages-org-url }}' && [ -z $customPackagesOrgUrl ] && echo '' || echo "--build-arg custompackagesorgurl=\"$customPackagesOrgUrl\"")" >> $GITHUB_OUTPUT
+
+        # Prepare action outputs
+        imageName=${{ inputs.image-name }}
+        imageRepository="${imageName%:*}"
+        imageTag="${imageName##*:}"
+        echo "image-repository=$imageRepository" >> $GITHUB_OUTPUT
+        echo "image-tag=$imageTag" >> $GITHUB_OUTPUT
     
     - name: Validate dockerfile
       shell: bash
