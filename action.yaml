@@ -22,7 +22,7 @@ inputs:
     description: "The extra arguments (build-args) to pass to the docker build process"
   wpm-registry-server:
     required: false
-    default: https://packages.softwareag.com
+    default: https://packages.webmethods.io
     description: "The webMethods packages registry server to use for pulling packages"
   custom-packages-org-url:
     required: false
