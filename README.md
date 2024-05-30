@@ -30,13 +30,12 @@ Github Action for building customized container images on top of webMethods prod
 ```yml
 - name: Build custom image
   id: build-image
-  uses: sag-private-cloud/sag-build-image@v2
+  uses: wm-private-cloud/wm-build-image@v2
   with:
     context: "."
     dockerfile: MSR/Dockerfile
     image-name: mycontainerregistry.com/myimage:mytag
-    wpm-registry: softwareag
-    wpm-registry-token: ${{ secrets.SAG_WPM_TOKEN }}
+    wpm-registry-token: ${{ secrets.WM_WPM_TOKEN }}
     packages: "WmPackage1 WmPackage2"
     custom-packages: "CustomPackage1:main CustomPackage2:v1"
     custom-packages-org-url: "https://github.com/myorganization"
