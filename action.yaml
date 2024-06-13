@@ -29,7 +29,7 @@ inputs:
     description: "The GitHub organization URL for pulling custom packages located in GitHub"
   wpm-registry:
     required: false
-    default: softwareag
+    default: licensed
     description: "The webMethods packages registry to use from the webMethods packages registry server"
   wpm-registry-token:
     required: true
