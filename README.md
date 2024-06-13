@@ -12,7 +12,7 @@ Github Action for building customized container images on top of webMethods prod
 | builder-number      |  | The build number. Passed as buildnumber build-arg to the docker build process |
 | extra-args      |  | The extra arguments (build-args) to pass to the docker build process |
 | wpm-registry-server      | https://packages.webmethods.io | The webMethods packages registry server to use for pulling packages. Passed as wpmregistryserver build-arg to the docker build process |
-| wpm-registry      | softwareag | The webMethods packages registry to use from the webMethods packages registry server. Passed as wpmregistry build-arg to the docker build process |
+| wpm-registry      | licensed | The webMethods packages registry to use from the webMethods packages registry server. Passed as wpmregistry build-arg to the docker build process |
 | wpm-registry-token      |  | The webMethods packages registry authentication token. Passed as wpmregistrytoken build-arg to the docker build process |
 | packages      |  | Packages to install, registered in the webMethods packages registry, seperated by space (e.g. "WmPackage1 WmPackage2"). Passed as packages build-arg to the docker build process |
 | custom-packages-org-url      |  | The GitHub organization URL for pulling custom packages located in GitHub. Passed as custompackagesorgurl build-arg to the docker build process |
